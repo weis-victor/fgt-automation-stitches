@@ -1,0 +1,59 @@
+# Replace <email-address> with email address
+
+config system automation-trigger
+    edit "fgd-sdns-rating-error_trigger"
+        set description "Trigger when there is a FortiGuard SDNS rating error on the FortiGate"
+        set event-type faz-event
+        set faz-event-name "FortiGuard SDNS Rating Error on FortiGate"
+    next
+end
+
+config system automation-action
+    edit "debug-dns_script"
+        set action-type cli-script
+        set minimum-interval 60
+        set script "
+	        config global
+				diag debug duration 1
+				diag debug application dnsproxy -1
+				diag debug enable
+			end"
+        set accprofile "super_admin"
+    next
+	edit "results-output_email"
+        set description "Email the results of previous action"
+        set action-type email
+        set email-to "<email-address>"
+        set email-subject "FortiGate Automation Result"
+        set message "%%results%%"
+    next
+	edit "restart-dnsproxy_script"
+        set description "Restart the dnsproxy daemon"
+        set action-type cli-script
+        set minimum-interval 15
+        set script "sudo global diagnose test application dnsproxy 99"
+        set accprofile "super_admin"
+    next
+end
+
+config system automation-stitch
+    edit "fgd-sdns-error_auto-healing"
+        set description "If FortiGuard rating errors are detected, attempt to restart the DNS Proxy Daemon to try to auto-heal the problem"
+        set trigger "fgd-sdns-rating-error_trigger"
+        config actions
+            edit 1
+                set action "debug-dns_script"
+                set required enable
+            next
+            edit 2
+                set action "results-output_email"
+                set required enable
+            next
+            edit 3
+                set action "restart-dnsproxy_script"
+                set delay 60
+                set required enable
+            next
+        end
+    next
+end
