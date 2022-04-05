@@ -1,0 +1,61 @@
+# Applies to FortiGates with bypass MMF ports (e.g. FG-80F-BYPASS, FG-400E-BYPASS, FG-2500E), which are a layer-1 optical switch that can fail open in the event of shutdown or system crash.
+# But this failing open happens at the physical layer, so it can trigger when the session state table is maxed out. That's where the automation stitch comes in!
+# If the FortiGate enters Conserve Mode, it's time to enable Bypass Mode. And if the FortiGate exists Conserve Mode, it's time to disable Bypass Mode.
+# The bypass ports must be in a Transparent Mode VDOM in order to be able to execute the bypass functionality.
+
+config system automation-trigger 
+    edit "fgt-enter-conserve-mode_trigger"
+        set description "Trigger when FortiGate enters conserve mode"
+        set event-type low-memory
+    next
+    edit "fgt-exit-conserve-mode_trigger"
+        set event-type event-log
+        set logid 22012
+    next
+end
+
+config system automation-action
+    edit "enable-bypass-mode_script"
+        set description "Execute bypass mode"
+        set action-type cli-script
+        set minimum-interval 300
+        set script "
+	        config global
+				execute bypass-mode enable
+			end"
+        set accprofile "super_admin"
+    next
+    edit "disable-bypass-mode_script"
+        set description "Execute bypass mode"
+        set action-type cli-script
+        set minimum-interval 300
+        set script "
+	        config global
+				    execute bypass-mode disable
+			    end"
+        set accprofile "super_admin"
+    next
+end
+
+config system automation-stitch
+    edit "enable-bypass-mode_stitch"
+        set description "If the FortiGate enters Conserve Mode, enable Bypass Mode to keep the network up"
+        set trigger "fgt-enter-conserve-mode_trigger"
+        config actions
+            edit 1
+                set action "enable-bypass-mode_script"
+                set required enable
+            next
+        end
+    next
+    edit "disable-bypass-mode_stitch"
+        set description "If the FortiGate exits Conserve Mode, enable Bypass Mode to keep the network up"
+        set trigger "fgt-exit-conserve-mode_trigger"
+        config actions
+            edit 1
+                set action "disable-bypass-mode_script"
+                set required enable
+            next
+        end
+    next
+end
