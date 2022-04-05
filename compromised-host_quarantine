@@ -1,0 +1,43 @@
+# Replace <email-address> with email address
+
+config system automation-trigger 
+	edit "ioc-host_trigger"
+        set description "Trigger when an Indicator of Compromise has been detected on a host endpoint"
+    next
+end
+
+config system automation-action
+    edit "access-layer_quarantine"
+        set description "Quarantine the MAC address on access layer devices (FortiSwitch and FortiAP)"
+        set action-type quarantine
+    next
+    edit "forticlient_quarantine"
+        set description "Use FortiClient EMS to quarantine the endpoint device."
+        set action-type quarantine-forticlient
+    next
+    edit "results-output_email"
+        set description "Email the results of previous action"
+        set action-type email
+        set email-to "<email-address>"
+        set email-subject "FortiGate Automation Result"
+        set message "%%results%%"
+    next
+end
+
+config system automation-stitch
+    edit "compromised-host_quarantine"
+        set description "If an IOC is detected for a host, quarantine its MAC address on FortiSwitch and FortiAP, and also use FortiClient EMS to trigger a FortiClient agent quarantine"
+        set trigger "ioc-host_trigger"
+        config actions
+            edit 1
+                set action "access-layer_quarantine"
+            next
+            edit 2
+                set action "forticlient_quarantine"
+            next
+            edit 3
+                set action "results-output_email"
+            next
+        end
+    next
+end
