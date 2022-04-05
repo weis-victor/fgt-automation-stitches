@@ -1,0 +1,34 @@
+# Most email alerts should be sent from FAZ, but if the FGT-FAZ connection is down, you a flying blind unless the FGT alerts directly.
+
+# Replace <email-address> with the email address you want to send the alert to
+
+config system automation-trigger 
+    edit "fgt-faz-connection-down_trigger"
+        set description "Trigger when FortiGate looses connection to FortiAnalyzer"
+        set event-type event-log
+        set logid 22902
+    next
+end
+
+config system automation-action
+    edit "fgt-faz-conncection-lost_email"
+        set description "Send email when ForitGate connection to FortiAnalyzer is lost"
+        set action-type email
+        set email-to "<email-address>"
+        set email-subject "FAZ Connection Lost on vweis-fw01"
+        set minimum-interval 86400
+    next
+end
+
+config system automation-stitch
+    edit "fgt-faz-connection-down_alert"
+        set description "Send an email alert when FortiGate looses connection with FortiAnalyzer"
+        set trigger "fgt-faz-connection-down_trigger"
+        config actions
+            edit 1
+                set action "fgt-faz-conncection-lost_email"
+                set required enable
+            next
+        end
+    next
+end
