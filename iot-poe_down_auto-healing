@@ -1,3 +1,5 @@
+# Let's use a Link Monitor to monitor if a PoE-connected IoT device goes offline, and if it does, let's try cycling PoE on its corresponding switchport. 
+
 # Replace <iot-hostname> with the hostname of the IoT device
 # Replace <iot-ip> with the IP address of the IoT device
 # Replace <srcintf-name> with the interface name from which the link monitor should originate
