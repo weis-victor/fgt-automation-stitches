@@ -44,11 +44,11 @@ config system automation-action
         set action-type cli-script
         set minimum-interval 300
         set script "
-	        config vdom
-				edit root
-					execute switch-controller switch-action poe reset <fsw-sn> <portN>
-				end
-			end"
+	  config vdom
+	    edit root
+	      execute switch-controller switch-action poe reset <fsw-sn> <portN>
+	    end
+	  end"
         set accprofile "super_admin"
     next
 end
