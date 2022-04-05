@@ -1,3 +1,9 @@
+# If you're getting lots of FortiGuard SDNS Rating Errors, there might be something wrong with the dnsproxy daemon, in which case your DNS Filtering isn't working.
+# Let's try to fix the problem by restrating the DNS proxy daemon.
+# Let's also run some debug commands to help us troubleshoot the root cause.
+# N.B. This stitch assumes that you have the Fabric Connector between FortiGate and FortiAnalyzer
+# See weis-victor/faz-event-handlers-custom/fgt-dns-rating-error.json for how the event handler is defined
+
 # Replace <email-address> with email address
 
 config system automation-trigger
@@ -13,11 +19,11 @@ config system automation-action
         set action-type cli-script
         set minimum-interval 60
         set script "
-	        config global
-				diag debug duration 1
-				diag debug application dnsproxy -1
-				diag debug enable
-			end"
+	  config global
+	    diag debug duration 1
+	    diag debug application dnsproxy -1
+	    diag debug enable
+	  end"
         set accprofile "super_admin"
     next
 	edit "results-output_email"
