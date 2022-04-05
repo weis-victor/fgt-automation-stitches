@@ -1,5 +1,10 @@
 # Replace <whatever-problem-you-are-having> with the Log ID of whatever problem you are having
 # Modify the debug-verbose_script to include whatever debug commands would be helpful for troubleshooting. This is just an example.
+# When you want to read the COMlog back later, just run `diagnose debug comlog read`
+# If you want to clear the COMlog, you can run `diagnose debug comlog clear`
+# If you want to see some meta-data about the COMlog, run `diagnose debug comlog info`
+# For more detail on COMlog see https://docs.fortinet.com/document/fortigate/6.4.0/best-practices/902203/recording-console-output
+
 
 config system automation-trigger 
     edit "intermittent-issue_trigger"
