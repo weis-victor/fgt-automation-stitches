@@ -1,0 +1,46 @@
+# Replace <fap-name> with name of FortiAP
+# Replace <fsw-name> with name of FortiSwitch
+# Replace <fsw-sn> with Serial Number of FortiSwitch
+# Replace <portN> with port number on FortiSwitch
+
+config system automation-trigger
+    edit "fap-down_<fap-name>_trigger"
+        set description "Trigger when <fap-name> is down"
+        set event-type event-log
+        set logid 43553 43552
+        config fields
+            edit 1
+                set name "ap"
+                set value "<fap-name>"
+            next
+        end
+    next
+end
+
+config system automation-action
+    edit "poe-cycle_<fap-name>_script"
+        set description "Reboot <fap-name> by cycling POE on <fsw-name>.<portN>"
+        set action-type cli-script
+        set minimum-interval 300
+        set script "
+		    config vdom
+				edit root
+					execute switch-controller switch-action poe reset <fsw-sn> <portN>
+				end
+			end"
+        set accprofile "super_admin"
+    next
+end
+
+config system automation-stitch
+    edit "<fap-name>_down_auto-healing"
+        set description "If <fap-name> goes down, attempt to auto-heal by cycling POE on FortiSwitch"
+        set trigger "fap-down_<fap-name>_trigger"
+        config actions
+            edit 1
+                set action "poe-cycle_<fap-name>_script"
+                set required enable
+            next
+        end
+    next
+end
