@@ -1,3 +1,6 @@
+# If a FortiAP goes down, let's try cycling PoE on its corresponding FortiSwitch port to try to bring it back online.
+# N.B. if you are using (MC)-LAG for the FortiAP, you'll need to cycle PoE on two FortiSwitch ports at the same time. 
+
 # Replace <fap-name> with name of FortiAP
 # Replace <fsw-name> with name of FortiSwitch
 # Replace <fsw-sn> with Serial Number of FortiSwitch
