@@ -1,0 +1,82 @@
+# Replace <whatever-problem-you-are-having> with the Log ID of whatever problem you are having
+# Modify the debug-verbose_script to include whatever debug commands would be helpful for troubleshooting. This is just an example.
+
+config system automation-trigger 
+    edit "intermittent-issue_trigger"
+        set description "Trigger when the issue happens"
+        set event-type event-log
+        set logid <whatever-problem-you-are-having>
+    next
+end
+
+config system automation-action
+    edit "debug-verbose_script"
+        set description "Use this script to collect debug informatino for troubleshooting"
+        set action-type cli-script
+        set script "
+	        config global
+			# Enable COMlog with standard output
+			config system console
+			  set output standard
+			end
+			diag debug comlog enable
+	
+			# Run debug commands
+			exec date
+			exec time
+			get system performance status
+			get system status
+			get hardware status
+			diag sys session stat
+			diag sys flash list
+			get system performance status
+			diag hardware deviceinfo disk
+			diag hardware sysinfo shm
+			diag hardware sysinfo memory
+			diag hardware sysinfo slab
+			diag autoupdate versions
+			diag debug crashlog read
+			exec time
+			get system performance status
+			# ping google to create command delay
+			sudo root exec ping google.com
+			exec time
+			get system performance status
+			sudo root exec ping google.com
+			exec time
+			get system performance status
+			sudo root exec ping google.com
+			exec time
+			get system performance status
+			diag sys top 
+			# sort by CPU
+			c
+			# sort by memory
+			m
+			# q to quit
+			q
+			exec time
+			get system performance status
+	
+			# Disable COMlog and re-enable more
+			diag debug comlog disable
+			config system console
+			  set output more
+			end
+		end"
+        set accprofile "super_admin"
+    next
+end
+
+config system automation-stitch
+    edit "comlog_troubleshooting"
+        set trigger "intermittent-issue_trigger"
+        config actions
+            edit 1
+                set action "debug-verbose_script"
+                set required enable
+            next
+        end
+    next
+end
+```
