@@ -1,3 +1,8 @@
+# If an endpoint is flagged for IOCs, let's quarantine it at the access layer (FortiSwitch and FortiAP) to ensure that no latteral pivoting can happen in the network, even within the same subnet.
+# Also attempt to Quarantine the endpoint via FortiCliene EMS, just in case the FortiSwitch/FortiAP Quarantine fails, or perhaps the device physically leaves your network.
+# Then alert an administrator to investigate and remediate.
+# N.B. This stitch assumes that you have FortiLink between FortiGate and FortiSwitch/FortiAP, and the Fabric Connector for FortiClient EMS
+
 # Replace <email-address> with email address
 
 config system automation-trigger 
