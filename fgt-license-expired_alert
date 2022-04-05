@@ -1,0 +1,33 @@
+# This could be handled from FAZ, but if you want to do it from the FGT, you can.
+
+# Replace <email-address> with the email address you want to alert
+
+config system automation-trigger 
+    edit "license-expiry_trigger"
+        set description "Trigger when FortiGuard license expires on FortiGate"
+        set event-type license-near-expiry
+        set license-type any
+    next
+end
+
+config system automation-action
+    edit "license-expired_email"
+        set description "Send email when license is expired"
+        set action-type email
+        set email-to "weis.victor@gmail.com"
+        set email-subject "License Expired on vweis-fw01"
+        set minimum-interval 86400
+    next
+end
+
+config system automation-stitch
+    edit "fgt-license-expired_alert"
+        set description "Send an email alert when FortiGuard license expires on FortiGate"
+        set trigger "license-expiry_trigger"
+        config actions
+            edit 1
+                set action "license-expired_email"
+            next
+        end
+    next
+end
