@@ -1,0 +1,44 @@
+# This is just an example. Modify accordingly.
+
+config system automation-trigger
+    edit "daily-02:00_schedule"
+        set description "Trigger daily at 2am"
+        set trigger-type scheduled
+        set trigger-frequency daily
+        set trigger-hour 2
+        set trigger-minute 0
+    next
+end
+
+config system automation-action
+    edit "after-hours-changes_script"
+        set description "Script out the configuration changes we need to make after hours"
+        set action-type cli-script
+        set minimum-interval 300
+        set script "#whatever changes you need to make"
+        set accprofile "super_admin"
+    next
+    edit "results-output_email"
+        set description "Email the results of previous action"
+        set action-type email
+        set email-to "user@example.com"
+        set email-subject "FortiGate Automation Result"
+        set message "%%results%%"
+    next
+end
+
+config system automation-stitch
+    edit "after-hours-changes_stitch"
+        set description "Execute the configuration changes at 2am and email the results"
+        set trigger "daily-02:00_schedule"
+        config actions
+            edit 1
+                set action "after-hours-changes_script"
+            next
+            edit 2
+                set action "results-output_email"
+                set required enable
+            next
+        end
+    next
+end
