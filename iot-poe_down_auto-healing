@@ -1,0 +1,65 @@
+# Replace <iot-hostname> with the hostname of the IoT device
+# Replace <iot-ip> with the IP address of the IoT device
+# Replace <srcintf-name> with the interface name from which the link monitor should originate
+# Replace <source-ip> with the IP address associated with <srcintf-name>
+# Replace <fsw-name> with name of FortiSwitch
+# Replace <fsw-sn> with Serial Number of FortiSwitch
+# Replace <portN> with port number on FortiSwitch
+
+
+config system link-monitor
+    edit "<iot-hostname>_link-mon"
+        set srcintf "<srcintf-name>"
+        set server "<iot-ip>"
+        set source-ip <source-ip>
+        set failtime 20
+        set update-policy-route disable
+        set service-detection enable
+    next
+end
+
+config system automation-trigger    
+    edit "<iot-hostname>_link-mon-down_trigger"
+        set description "Trigger when link monitor for <iot-hostname> goes down"
+        set event-type event-log
+        set logid 22922
+        config fields
+            edit 1
+                set name "name"
+                set value "<iot-hostname>_link-mon"
+            next
+            edit 2
+                set name "msg"
+                set value "Link Monitor changed state from alive to dead, protocol: ping."
+            next
+        end
+    next
+end
+
+config system automation-action
+    edit "poe-cycle_<iot-hostname>_script"
+        set description "Reboot <iot-hostname> by cycling POE on <fsw-name>.<portN>"
+        set action-type cli-script
+        set minimum-interval 300
+        set script "
+	        config vdom
+				edit root
+					execute switch-controller switch-action poe reset <fsw-sn> <portN>
+				end
+			end"
+        set accprofile "super_admin"
+    next
+end
+
+config system automation-stitch
+    edit "<iot-hostname>_down_auto-healing"
+        set description "If <iot-hostname> goes down, attempt to auto-heal by cycling POE on FortiSwitch"
+        set trigger "<iot-hostname>_link-mon-down_trigger"
+        config actions
+            edit 1
+                set action "poe-cycle_<iot-hostname>_script"
+                set required enable
+            next
+        end
+    next
+end
